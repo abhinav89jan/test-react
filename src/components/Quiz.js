@@ -8,18 +8,22 @@ const Quiz = () => {
     "https://opentdb.com/api.php?amount=10&category=31&difficulty=easy&type=multiple&encode=url3986";
 
   useEffect(() => {
-    if (quizState.questions.length > 0) {
-      return;
-    }
-    console.log("on initialize");
+    const fetchApiData = () => {
+      fetch(apiUrl)
+        .then((res) => res.json())
+        .then((data) => {
+          if (!data.results || data.results.length === 0) {
+            throw new Error("No quiz data received from API.");
+          }
+          dispatch({ type: "LOADED_QUESTIONS", payload: data.results });
+        });
+    };
+    fetchApiData();
+  }, [quizState.showResults]);
 
-    fetch(apiUrl)
-      .then((res) => res.json())
-      .then((data) => {
-        console.log("data", data);
-        dispatch({ type: "LOADED_QUESTIONS", payload: data.results });
-      });
-  });
+  const restart = () => {
+    dispatch({ type: "RESTART" });
+  };
 
   return (
     <div className="quiz">
@@ -33,10 +37,7 @@ const Quiz = () => {
               {quizState.questions.length}
             </div>
           </div>
-          <div
-            className="next-button"
-            onClick={() => dispatch({ type: "RESTART" })}
-          >
+          <div className="next-button" onClick={() => restart()}>
             Restart
           </div>
         </div>
